@@ -3,54 +3,39 @@ class RockPaperScissors
     @players = []
   end
 
-  def entry(name)
-    @players.push(Player.new(name))
+  def entry player
+    @players << player
   end
 
-  def shoot
-    @players.each {|player| player.setHand}
+  def shoot!
+    @players.each(&:shoot!)
+    players_hands = @players.map(&:hand)
+    @players.each {|player| player.settle! players_hands}
   end
 
-  def judge
-    playersHands = @players.map {|player| player.hand}
-    @players.each {|player| player.setResult(playersHands)}
-  end
-
-  def printResult
-    @players.each {|player| puts player.name + ":" + player.hand + "(#{player.result})"}
+  def result
+    @players.map {|player| "#{player.name} : #{player.hand} (#{player.result})"}
   end
 end
 
 class Player
-  HAND_PATTERN = [["Rock","Scissors"],["Paper","Rock"],["Scissors","Paper"]]
-  attr_reader :name
-  attr_reader :hand
-  attr_reader :result
+  attr_reader :name, :hand, :result
 
-  def initialize(name)
+  def initialize name
     @name = name
-    @hand = ""
-    @breakableHand = ""
-    @result = ""
+    @hand = nil
+    @breakable_hand = nil
+    @result = nil
   end
 
-  def setHand
-    handsSet = HAND_PATTERN[rand(0..HAND_PATTERN.length - 1)]
-    @hand = handsSet.first
-    @breakableHand = handsSet.last
+  def shoot!
+    hand_pattern = [["Rock","Scissors"],["Paper","Rock"],["Scissors","Paper"]]
+    @hand,@breakable_hand = hand_pattern.sample
   end
 
-  def setResult(hands)
-    handsTypeCount = hands.uniq.length
-
-    if handsTypeCount != 2
-      @result = "Draw"
-    else
-      if hands.include?(@breakableHand)
-        @result = "Win"
-      else
-        @result = "Lose"
-      end
-    end
+  def settle! hands
+    @result = hands.uniq.length != 2 ?
+      "Draw" : hands.include?(@breakable_hand) ?
+        "Win" : "Lose"
   end
 end
