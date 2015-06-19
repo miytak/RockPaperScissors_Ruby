@@ -13,7 +13,7 @@ class RockPaperScissors
     @players.each {|player| player.settle! players_hands}
   end
 
-  def result
+  def results
     @players.map {|player| "#{player.name} : #{player.hand} (#{player.result})"}
   end
 end
